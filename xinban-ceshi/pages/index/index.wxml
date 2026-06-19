@@ -1,0 +1,118 @@
+<view class="container">
+  <view class="header-section">
+    <view class="header-content">
+      <view class="header-left">
+        <view class="logo-area">
+          <image class="logo" src="/images/logo.png" mode="aspectFill"></image>
+        </view>
+        <view class="header-title">
+          <view class="app-name">鑫办</view>
+          <view class="app-subtitle">智能办公协作平台</view>
+        </view>
+      </view>
+      <view class="logout-btn" bindtap="logout">退出</view>
+    </view>
+    
+    <view class="user-card">
+      <view class="user-avatar">{{userData.name ? userData.name.charAt(0) : '?'}}</view>
+      <view class="user-info">
+        <view class="user-name">{{userData.name || '用户'}}</view>
+        <view class="user-role">{{userData.roleName || '普通员工'}} · {{userData.department}}</view>
+      </view>
+      <view class="date-display">
+        <text>{{currentDate}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="stats-cards">
+    <view class="stat-card">
+      <view class="stat-icon check-in">{{todayChecked ? '✓' : '○'}}</view>
+      <view class="stat-label">今日打卡</view>
+      <view class="stat-value">{{todayChecked ? '已完成' : '未打卡'}}</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon pending">📝</view>
+      <view class="stat-label">待审批</view>
+      <view class="stat-value">{{pendingCount}}</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon notification">📢</view>
+      <view class="stat-label">新公告</view>
+      <view class="stat-value">{{noticeCount}}</view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title">快捷功能</view>
+    </view>
+    <view class="quick-grid">
+      <view class="quick-item" bindtap="navigateTo" data-url="/pages/attendance/attendance">
+        <view class="quick-icon check">📋</view>
+        <view class="quick-content">
+          <view class="quick-title">考勤打卡</view>
+          <view class="quick-desc">每日考勤记录</view>
+        </view>
+        <view class="quick-arrow">›</view>
+      </view>
+      <view class="quick-item" bindtap="navigateTo" data-url="/pages/approval/approval">
+        <view class="quick-icon approval">✏️</view>
+        <view class="quick-content">
+          <view class="quick-title">发起审批</view>
+          <view class="quick-desc">申请审批流程</view>
+        </view>
+        <view class="quick-arrow">›</view>
+      </view>
+      <view class="quick-item" bindtap="navigateTo" data-url="/pages/chat/chat">
+        <view class="quick-icon chat">💬</view>
+        <view class="quick-content">
+          <view class="quick-title">内部群聊</view>
+          <view class="quick-desc">团队沟通协作</view>
+        </view>
+        <view class="quick-arrow">›</view>
+      </view>
+      <view class="quick-item" bindtap="navigateTo" data-url="/pages/notice/notice">
+        <view class="quick-icon notice">📢</view>
+        <view class="quick-content">
+          <view class="quick-title">企业公告</view>
+          <view class="quick-desc">最新通知动态</view>
+        </view>
+        <view class="quick-arrow">›</view>
+      </view>
+      <view class="quick-item" bindtap="navigateTo" data-url="/pages/contacts/contacts">
+        <view class="quick-icon contacts">📁</view>
+        <view class="quick-content">
+          <view class="quick-title">文件网盘</view>
+          <view class="quick-desc">共享文件管理</view>
+        </view>
+        <view class="quick-arrow">›</view>
+      </view>
+      <view class="quick-item" bindtap="navigateTo" data-url="/pages/contacts/contacts">
+        <view class="quick-icon org">👥</view>
+        <view class="quick-content">
+          <view class="quick-title">通讯录</view>
+          <view class="quick-desc">企业组织架构</view>
+        </view>
+        <view class="quick-arrow">›</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title">最近公告</view>
+      <view class="section-more" bindtap="navigateTo" data-url="/pages/notice/notice">查看全部 ›</view>
+    </view>
+    <view wx:if="{{notices.length > 0}}" class="notice-list">
+      <view wx:for="{{notices}}" wx:key="_id" class="notice-item">
+        <view class="notice-title">{{item.content}}</view>
+        <view class="notice-meta">{{item.publisher || '系统'}} · {{formatDate(item.createTime)}}</view>
+      </view>
+    </view>
+    <view wx:else class="notification-empty">
+      <view class="empty-icon">📢</view>
+      <view class="empty-text">暂无公告</view>
+    </view>
+  </view>
+</view>

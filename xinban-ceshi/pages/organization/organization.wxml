@@ -1,0 +1,57 @@
+<view class="container">
+  <view class="page-header">
+    <view class="back-btn" bindtap="goBack">‹</view>
+    <view class="page-title">组织架构</view>
+    <view class="header-action" wx:if="{{isAdmin}}" bindtap="showAddModal">添加员工</view>
+  </view>
+
+  <view class="user-list">
+    <view wx:if="{{users.length === 0}}" class="empty-state">
+      <view class="empty-icon">👥</view>
+      <view class="empty-text">暂无员工信息</view>
+    </view>
+
+    <view wx:for="{{users}}" wx:key="_id" class="user-card">
+      <view class="user-avatar">
+        <text>{{item.name.charAt(0)}}</text>
+        <view wx:if="{{item.isAdmin}}" class="admin-badge">管理员</view>
+      </view>
+      <view class="user-info">
+        <view class="user-name">{{item.name}}</view>
+        <view class="user-role">{{item.role}}</view>
+        <view class="user-dept">{{item.department || '未分配部门'}}</view>
+      </view>
+      <view wx:if="{{isAdmin}}" class="user-actions">
+        <view class="action-btn delete-btn" bindtap="deleteUser" data-id="{{item._id}}">删除</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showAddModal}}" class="modal-overlay" bindtap="hideAddModal">
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">添加员工</text>
+        <view class="modal-close" bindtap="hideAddModal">×</view>
+      </view>
+      <view class="form-item">
+        <label class="form-label">姓名</label>
+        <input class="form-input" placeholder="请输入姓名" value="{{newUser.name}}" bindinput="onNameInput" />
+      </view>
+      <view class="form-item">
+        <label class="form-label">职位</label>
+        <picker mode="selector" range="{{roles}}" bindchange="onRoleChange">
+          <view class="form-picker">{{newUser.role}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <label class="form-label">部门</label>
+        <input class="form-input" placeholder="请输入部门" value="{{newUser.department}}" bindinput="onDepartmentInput" />
+      </view>
+      <view class="form-item">
+        <label class="form-label">初始密码</label>
+        <input class="form-input" type="password" placeholder="请设置初始密码" value="{{newUser.password}}" bindinput="onPasswordInput" />
+      </view>
+      <button class="submit-btn" bindtap="addUser">确认添加</button>
+    </view>
+  </view>
+</view>

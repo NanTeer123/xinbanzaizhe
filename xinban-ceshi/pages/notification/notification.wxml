@@ -1,0 +1,32 @@
+<view class="container">
+  <view class="page-header">
+    <view class="back-btn" bindtap="goBack">‹</view>
+    <view class="page-title">通知中心</view>
+    <view class="header-action" bindtap="markAllAsRead">全部已读</view>
+  </view>
+
+  <view class="notification-list">
+    <view wx:if="{{notifications.length === 0}}" class="empty-state">
+      <view class="empty-icon">🔔</view>
+      <view class="empty-text">暂无通知</view>
+    </view>
+
+    <view wx:for="{{notifications}}" wx:key="_id" class="notification-item {{item.read ? '' : 'unread'}}" bindtap="markAsRead" data-id="{{item._id}}">
+      <view class="notification-icon">
+        <text wx:if="{{item.type === 'approval'}}">📋</text>
+        <text wx:elif="{{item.type === 'task'}}">📌</text>
+        <text wx:elif="{{item.type === 'score'}}">⭐</text>
+        <text wx:else>🔔</text>
+      </view>
+      <view class="notification-content">
+        <view class="notification-title">{{item.title}}</view>
+        <view class="notification-desc">{{item.content}}</view>
+        <view class="notification-time">{{formatDate(item.createTime)}}</view>
+      </view>
+      <view class="notification-action" catchtap="deleteNotification" data-id="{{item._id}}">
+        <text class="delete-icon">×</text>
+      </view>
+      <view wx:if="{{!item.read}}" class="unread-dot"></view>
+    </view>
+  </view>
+</view>

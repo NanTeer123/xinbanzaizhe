@@ -1,0 +1,70 @@
+<view class="container">
+  <view class="page-header">
+    <view class="page-title">通讯录</view>
+    <view wx:if="{{userData && userData.role === 'super_admin'}}" class="header-action" bindtap="showAddModal">+ 添加</view>
+  </view>
+
+  <view class="content">
+    <view wx:if="{{departments.length > 0}}" class="dept-list">
+      <view wx:for="{{departments}}" wx:key="name" class="dept-section">
+        <view class="dept-header" bindtap="toggleDept" data-name="{{item.name}}">
+          <view class="dept-name">{{item.name}}</view>
+          <view class="dept-count">{{getDeptUsers(item.name).length}}人</view>
+          <view class="dept-arrow {{expandedDepts.includes(item.name) ? 'expanded' : ''}}">›</view>
+        </view>
+        <view wx:if="{{expandedDepts.includes(item.name)}}" class="user-list">
+          <view wx:for="{{getDeptUsers(item.name)}}" wx:key="_id" class="user-item" bindtap="viewUser" data-user="{{item}}">
+            <view class="user-avatar">{{item.name ? item.name.charAt(0) : '?'}}</view>
+            <view class="user-info">
+              <view class="user-name">{{item.name}}</view>
+              <view class="user-role">{{item.roleName}}</view>
+            </view>
+            <view class="user-action">
+              <text class="chat-icon">💬</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view wx:else class="empty-state">
+      <view class="empty-icon">👥</view>
+      <view class="empty-text">暂无部门数据</view>
+    </view>
+  </view>
+
+  <view class="modal" wx:if="{{showAddModal}}" bindtap="hideAddModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">{{isEdit ? '编辑员工' : '添加员工'}}</view>
+        <view class="modal-close" bindtap="hideAddModal">×</view>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">姓名</view>
+          <input class="form-input" placeholder="请输入姓名" value="{{newUser.name}}" bindinput="onNameInput" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">账号</view>
+          <input class="form-input" placeholder="请输入账号" value="{{newUser.username}}" bindinput="onUsernameInput" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">密码</view>
+          <input class="form-input" type="password" placeholder="请输入密码" value="{{newUser.password}}" bindinput="onPasswordInput" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">所属部门</view>
+          <picker mode="selector" range="{{deptNames}}" bindchange="onDepartmentChange">
+            <view class="form-picker">{{newUser.department || '请选择部门'}}</view>
+          </picker>
+        </view>
+        <view class="form-item">
+          <view class="form-label">角色权限</view>
+          <picker mode="selector" range="{{roleOptions}}" bindchange="onRoleChange">
+            <view class="form-picker">{{newUser.roleName || '请选择角色'}}</view>
+          </picker>
+        </view>
+      </view>
+      <button class="submit-btn" bindtap="saveUser">保存</button>
+    </view>
+  </view>
+</view>

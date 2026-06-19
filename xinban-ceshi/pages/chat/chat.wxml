@@ -1,0 +1,43 @@
+<view class="container">
+  <view class="page-header">
+    <view class="page-title">消息</view>
+  </view>
+
+  <view wx:if="{{!showChat}}" class="chat-list">
+    <view wx:for="{{conversations}}" wx:key="id" class="chat-item" bindtap="enterChat" data-id="{{item.id}}" data-type="{{item.type}}">
+      <view class="chat-avatar">{{item.avatar}}</view>
+      <view class="chat-info">
+        <view class="chat-name">{{item.name}}</view>
+        <view class="chat-last">{{item.lastMessage}}</view>
+      </view>
+      <view class="chat-time">{{item.time}}</view>
+      <view wx:if="{{item.unread > 0}}" class="unread-badge">{{item.unread}}</view>
+    </view>
+  </view>
+
+  <view wx:if="{{showChat}}" class="chat-panel">
+    <view class="chat-header">
+      <view class="back-btn" bindtap="closeChat">‹</view>
+      <view class="chat-title">{{currentChatName}}</view>
+    </view>
+    <scroll-view class="message-list" scroll-y scroll-into-view="msg-{{messages.length - 1}}">
+      <view wx:for="{{messages}}" wx:key="_id" id="msg-{{index}}" class="message-item {{item.isSelf ? 'self' : ''}}">
+        <view class="message-avatar">{{item.isSelf ? (userData.name ? userData.name.charAt(0) : '?') : item.avatar}}</view>
+        <view class="message-content">
+          <view wx:if="{{item.content}}" class="message-text">{{item.content}}</view>
+          <view wx:if="{{item.image}}" class="message-image">
+            <image src="{{item.image}}" mode="widthFix" bindtap="previewImage" data-url="{{item.image}}"></image>
+          </view>
+          <view class="message-time">{{item.time}}</view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="chat-input-bar">
+      <view class="input-actions">
+        <view class="action-btn" bindtap="chooseImage">📷</view>
+      </view>
+      <input class="chat-input" placeholder="输入消息..." value="{{inputText}}" bindinput="onInput" confirm-type="send" bindconfirm="sendMessage" />
+      <button class="send-btn" bindtap="sendMessage">发送</button>
+    </view>
+  </view>
+</view>

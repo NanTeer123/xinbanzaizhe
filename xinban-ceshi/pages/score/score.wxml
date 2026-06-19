@@ -1,0 +1,67 @@
+<view class="container">
+  <view class="page-header">
+    <view class="back-btn" bindtap="goBack">‹</view>
+    <view class="page-title">评分系统</view>
+    <view class="header-placeholder"></view>
+  </view>
+
+  <view class="content">
+    <view class="card">
+      <view class="card-title">待评分任务</view>
+      <view wx:for="{{completedTasks}}" wx:key="_id" wx:if="{{!item.scored}}" class="todo-item">
+        <view class="todo-info">
+          <view class="todo-title">{{item.title}}</view>
+          <view class="todo-meta">负责人：{{item.assigneeName}}</view>
+        </view>
+        <button class="score-btn" bindtap="showScoreModal" data-task="{{item}}">评分</button>
+      </view>
+      <view wx:if="{{!hasTodoTasks}}" class="empty-list">
+        <text class="empty-text">暂无待评分任务</text>
+      </view>
+    </view>
+
+    <view class="card">
+      <view class="card-title">评分记录</view>
+      <view wx:for="{{scores}}" wx:key="_id" class="score-item">
+        <view class="score-header">
+          <view class="score-title">{{item.taskTitle}}</view>
+          <view class="score-stars">{{getScoreStars(item.score)}}</view>
+        </view>
+        <view class="score-meta">负责人：{{item.assigneeName}} · {{formatDate(item.createTime)}}</view>
+        <view class="score-comment">{{item.comment}}</view>
+      </view>
+      <view wx:if="{{scores.length === 0}}" class="empty-list">
+        <text class="empty-text">暂无评分记录</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal" wx:if="{{showScoreModal}}" bindtap="hideScoreModal">
+    <view class="modal-content">
+      <view class="modal-header">
+        <view class="modal-title">任务评分</view>
+        <view class="modal-close" bindtap="hideScoreModal">×</view>
+      </view>
+      <view class="task-info">{{selectedTaskTitle}}</view>
+      
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">评分</view>
+          <picker mode="selector" range="{{[1,2,3,4,5]}}" value="{{score - 1}}" bindchange="onScoreChange">
+            <view class="form-picker stars-picker">{{getScoreStars(score)}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <view class="form-label">评价</view>
+          <textarea class="form-input form-textarea" placeholder="请输入评价内容" value="{{comment}}" bindinput="onCommentInput" />
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="modal-btn btn-cancel" bindtap="hideScoreModal">取消</button>
+        <button class="modal-btn btn-confirm" bindtap="submitScore">提交</button>
+      </view>
+    </view>
+  </view>
+</view>

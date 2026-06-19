@@ -1,0 +1,83 @@
+<view class="container">
+  <view class="page-header">
+    <view class="page-title">考勤打卡</view>
+  </view>
+
+  <view class="content">
+    <view class="card clock-card">
+      <view class="date-display">{{todayDate}}</view>
+      <view class="time-display">
+        <view class="time-item">
+          <view class="time-label">上班时间</view>
+          <view class="time-value">{{checkInTime ? formatTime(checkInTime) : '--:--'}}</view>
+        </view>
+        <view class="time-divider">|</view>
+        <view class="time-item">
+          <view class="time-label">下班时间</view>
+          <view class="time-value">{{checkOutTime ? formatTime(checkOutTime) : '--:--'}}</view>
+        </view>
+      </view>
+      <view class="clock-buttons">
+        <button wx:if="{{!checkInTime}}" class="clock-btn btn-in" bindtap="checkIn">手动打卡</button>
+        <button wx:if="{{!checkInTime}}" class="clock-btn btn-photo" bindtap="photoCheckIn">拍照打卡</button>
+        <button wx:elif="{{!checkOutTime}}" class="clock-btn btn-out" bindtap="checkOut">下班打卡</button>
+        <view wx:else class="status-text">✓ 今日已完成打卡</view>
+      </view>
+    </view>
+
+    <view class="card">
+      <button class="apply-btn" bindtap="showLeaveModal">📅 请假申请</button>
+    </view>
+
+    <view class="card">
+      <view class="card-title">打卡记录</view>
+      <view wx:if="{{records.length > 0}}" class="records-list">
+        <view wx:for="{{records}}" wx:key="_id" class="record-item">
+          <view class="record-date">{{formatDate(item.date)}}</view>
+          <view class="record-info">
+            <view class="record-type">
+              <text wx:if="{{item.type === 'leave'}}">🏖️ 请假</text>
+              <text wx:elif="{{item.type === 'photo'}}">📷 拍照打卡</text>
+              <text wx:else>📋 手动打卡</text>
+            </view>
+            <view class="record-time">
+              <text class="time-in">{{item.checkInTime ? formatTime(item.checkInTime) : '--:--'}}</text>
+              <text class="time-separator"> - </text>
+              <text class="time-out">{{item.checkOutTime ? formatTime(item.checkOutTime) : '未下班'}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:else class="empty-state">
+        <view class="empty-icon">📋</view>
+        <view class="empty-text">暂无打卡记录</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal" wx:if="{{showLeaveModal}}" bindtap="hideLeaveModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">请假申请</view>
+        <view class="modal-close" bindtap="hideLeaveModal">×</view>
+      </view>
+      <view class="form-item">
+        <view class="form-label">开始日期</view>
+        <picker mode="date" value="{{leaveStart}}" bindchange="onLeaveStartChange">
+          <view class="form-picker">{{leaveStart || '请选择开始日期'}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <view class="form-label">结束日期</view>
+        <picker mode="date" value="{{leaveEnd}}" bindchange="onLeaveEndChange">
+          <view class="form-picker">{{leaveEnd || '请选择结束日期'}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <view class="form-label">请假事由</view>
+        <textarea class="form-textarea" placeholder="请输入请假事由" value="{{leaveReason}}" bindinput="onLeaveReasonInput" />
+      </view>
+      <button class="submit-btn" bindtap="submitLeave">提交申请</button>
+    </view>
+  </view>
+</view>

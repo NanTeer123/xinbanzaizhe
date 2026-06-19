@@ -1,0 +1,191 @@
+<view class="container">
+  <view class="page-header">
+    <view class="back-btn" bindtap="goBack">‹</view>
+    <view class="page-title">任务管理</view>
+    <view class="header-placeholder"></view>
+  </view>
+
+  <view class="content">
+    <view class="tabs-card card">
+      <view class="tabs">
+        <view class="tab {{activeTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">我分配的</view>
+        <view class="tab {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">我负责的</view>
+      </view>
+    </view>
+
+    <view class="action-bar" wx:if="{{activeTab === 0 && isAdmin}}">
+      <button class="add-btn" bindtap="showAddModal">
+        <text class="add-icon">+</text>
+        创建任务
+      </button>
+    </view>
+
+    <view wx:if="{{activeTab === 0}}" class="list-container">
+      <view wx:for="{{tasks}}" wx:key="_id" class="card task-card">
+        <view class="card-header">
+          <view class="task-title">{{item.title}}</view>
+          <view class="status-badge {{item.status}}">{{getStatusText(item.status)}}</view>
+        </view>
+        <view class="task-meta">
+          <text class="meta-item">负责人：{{item.assigneeName}}</text>
+          <text class="meta-divider">·</text>
+          <text class="meta-item">截止：{{formatDate(item.deadline)}}</text>
+          <text class="meta-divider">·</text>
+          <text class="meta-item">周期：每{{item.phaseInterval || 3}}天</text>
+        </view>
+        <view class="task-content">{{item.description}}</view>
+        <view class="task-phases" wx:if="{{item.phases && item.phases.length > 0}}">
+          <view wx:for="{{item.phases}}" wx:key="name" wx:for-item="phase" class="phase-item" bindtap="togglePhase" data-taskid="{{item._id}}" data-index="{{index}}">
+            <text class="phase-icon {{phase.completed ? 'completed' : ''}}">{{phase.completed ? '✓' : '○'}}</text>
+            <text class="phase-name">{{phase.name}}</text>
+          </view>
+        </view>
+        <view wx:if="{{isAdmin}}" class="action-buttons">
+          <button class="action-btn btn-delete" bindtap="deleteTask" data-id="{{item._id}}">删除</button>
+        </view>
+      </view>
+      <view wx:if="{{tasks.length === 0}}" class="card empty-card">
+        <view class="empty-state">
+          <view class="empty-icon">📋</view>
+          <view class="empty-text">暂无分配的任务</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{activeTab === 1}}" class="list-container">
+      <view wx:for="{{myTasks}}" wx:key="_id" class="card task-card">
+        <view class="card-header">
+          <view class="task-title">{{item.title}}</view>
+          <view class="status-badge {{item.status}}">{{getStatusText(item.status)}}</view>
+        </view>
+        <view class="task-meta">
+          <text class="meta-item">截止：{{formatDate(item.deadline)}}</text>
+          <text class="meta-divider">·</text>
+          <text class="meta-item">周期：每{{item.phaseInterval || 3}}天汇报</text>
+        </view>
+        <view class="task-content">{{item.description}}</view>
+        <view class="task-phases" wx:if="{{item.phases && item.phases.length > 0}}">
+          <view wx:for="{{item.phases}}" wx:key="name" wx:for-item="phase" class="phase-item" bindtap="togglePhase" data-taskid="{{item._id}}" data-index="{{index}}">
+            <text class="phase-icon {{phase.completed ? 'completed' : ''}}">{{phase.completed ? '✓' : '○'}}</text>
+            <text class="phase-name">{{phase.name}}</text>
+          </view>
+        </view>
+        <view class="action-buttons" wx:if="{{item.status !== 'completed'}}">
+          <button class="action-btn btn-progress" bindtap="showProgressModal" data-task="{{item}}">汇报进度</button>
+          <button class="action-btn btn-complete" bindtap="completeTask" data-id="{{item._id}}">完成任务</button>
+        </view>
+        <view class="progress-history" wx:if="{{item.progressHistory && item.progressHistory.length > 0}}">
+          <view class="history-title">进度记录：</view>
+          <view wx:for="{{item.progressHistory}}" wx:key="time" wx:for-item="history" class="history-item">
+            <view class="history-time">{{formatDateTime(history.time)}}</view>
+            <view class="history-content">{{history.report}}</view>
+            <view wx:if="{{history.reason}}" class="history-reason">未完成原因：{{history.reason}}</view>
+            <view wx:if="{{history.images && history.images.length > 0}}" class="history-images">
+              <image wx:for="{{history.images}}" wx:key="*this" wx:for-item="img" class="history-image" src="{{img}}" mode="widthFix" bindtap="previewImage" data-url="{{img}}"></image>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view wx:if="{{myTasks.length === 0}}" class="card empty-card">
+        <view class="empty-state">
+          <view class="empty-icon">📋</view>
+          <view class="empty-text">暂无负责的任务</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal" wx:if="{{showAddModal}}" bindtap="hideAddModal">
+    <view class="modal-content">
+      <view class="modal-header">
+        <view class="modal-title">创建任务</view>
+        <view class="modal-close" bindtap="hideAddModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">标题</view>
+          <input class="form-input" placeholder="请输入任务标题" value="{{newTask.title}}" bindinput="onTitleInput" />
+        </view>
+
+        <view class="form-item">
+          <view class="form-label">描述</view>
+          <textarea class="form-input form-textarea" placeholder="请输入任务描述" value="{{newTask.description}}" bindinput="onDescriptionInput" />
+        </view>
+
+        <view class="form-item">
+          <view class="form-label">负责人</view>
+          <picker mode="selector" range="{{users}}" range-key="name" bindchange="onAssigneeChange">
+            <view class="form-picker">{{assigneeName}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <view class="form-label">截止日期</view>
+          <picker mode="date" value="{{newTask.deadline}}" bindchange="onDeadlineChange">
+            <view class="form-picker">{{newTask.deadline || '请选择截止日期'}}</view>
+          </picker>
+        </view>
+
+        <view class="form-item">
+          <view class="form-label">汇报周期（天）</view>
+          <input class="form-input" type="number" placeholder="默认3天" value="{{newTask.phaseInterval}}" bindinput="onPhaseIntervalChange" />
+        </view>
+
+        <view class="form-item">
+          <view class="form-row">
+            <view class="form-label">工作阶段</view>
+            <button class="add-phase-btn" bindtap="addPhase">+添加</button>
+          </view>
+          <view wx:for="{{newTask.phases}}" wx:key="*this" wx:for-item="phase" wx:for-index="idx" class="phase-input-item">
+            <input class="form-input" placeholder="阶段名称" value="{{phase.name}}" data-index="{{idx}}" bindinput="onPhaseNameInput" />
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="modal-btn btn-cancel" bindtap="hideAddModal">取消</button>
+        <button class="modal-btn btn-confirm" bindtap="createTask">创建</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="modal" wx:if="{{showProgressModal}}" bindtap="hideProgressModal">
+    <view class="modal-content progress-modal">
+      <view class="modal-header">
+        <view class="modal-title">汇报进度</view>
+        <view class="modal-close" bindtap="hideProgressModal">×</view>
+      </view>
+      
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">进度报告</view>
+          <textarea class="form-input form-textarea" placeholder="请描述当前完成情况，如：已完成需求分析，开始进行设计" value="{{progressReport}}" bindinput="onProgressInput" />
+        </view>
+
+        <view class="form-item">
+          <view class="form-label">未完成原因（选填）</view>
+          <textarea class="form-input form-textarea" placeholder="如有未完成部分请说明原因" value="{{reason}}" bindinput="onReasonInput" />
+        </view>
+
+        <view class="form-item">
+          <view class="form-label">上传图片（可选，最多9张）</view>
+          <view class="image-upload">
+            <view wx:for="{{images}}" wx:key="*this" wx:for-item="img" wx:for-index="idx" class="uploaded-image" bindtap="previewImage" data-index="{{idx}}">
+              <image src="{{img}}" mode="aspectFill"></image>
+              <view class="image-delete" bindtap="deleteImage" data-index="{{idx}}">×</view>
+            </view>
+            <view wx:if="{{images.length < maxImages}}" class="upload-btn" bindtap="chooseImage">
+              <text class="upload-icon">+</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="modal-btn btn-cancel" bindtap="hideProgressModal">取消</button>
+        <button class="modal-btn btn-confirm" bindtap="submitProgress">提交</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,76 @@
+<view class="container">
+  <view class="page-header">
+    <view class="page-title">审批中心</view>
+  </view>
+
+  <view class="tabs">
+    <view class="tab {{activeTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">全部</view>
+    <view class="tab {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">待我审批</view>
+    <view class="tab {{activeTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">我发起</view>
+    <view class="tab {{activeTab === 3 ? 'active' : ''}}" bindtap="switchTab" data-index="3">已办结</view>
+  </view>
+
+  <view class="action-bar">
+    <button class="add-btn" bindtap="showAddModal">发起审批</button>
+  </view>
+
+  <view wx:if="{{approvals.length > 0}}" class="approval-list">
+    <view wx:for="{{approvals}}" wx:key="_id" class="approval-card">
+      <view class="card-header">
+        <view class="approval-title">{{item.title}}</view>
+        <view class="status-badge {{item.status}}">{{getStatusText(item.status)}}</view>
+      </view>
+      <view class="card-body">
+        <view class="meta-info">
+          <text>申请人：{{item.applicantName}}</text>
+          <text class="divider">·</text>
+          <text>部门：{{item.department}}</text>
+          <text class="divider">·</text>
+          <text>{{formatDate(item.createTime)}}</text>
+        </view>
+        <view class="approval-content">{{item.content}}</view>
+        <view wx:if="{{item.images && item.images.length > 0}}" class="approval-images">
+          <image wx:for="{{item.images}}" wx:key="*this" src="{{item}}" mode="widthFix" class="preview-image" bindtap="previewImage" data-url="{{item}}"></image>
+        </view>
+      </view>
+      <view wx:if="{{item.status === 'pending' && canApprove(item)}}" class="card-actions">
+        <button class="action-btn btn-reject" bindtap="rejectApproval" data-id="{{item._id}}">驳回</button>
+        <button class="action-btn btn-approve" bindtap="approveApproval" data-id="{{item._id}}">通过</button>
+      </view>
+    </view>
+  </view>
+  <view wx:else class="empty-state">
+    <view class="empty-icon">📝</view>
+    <view class="empty-text">暂无审批记录</view>
+  </view>
+
+  <view class="modal" wx:if="{{showAddModal}}" bindtap="hideAddModal">
+    <view class="modal-content">
+      <view class="modal-header">
+        <view class="modal-title">发起审批</view>
+        <view class="modal-close" bindtap="hideAddModal">×</view>
+      </view>
+      <view class="form-item">
+        <view class="form-label">审批标题</view>
+        <input class="form-input" placeholder="请输入审批标题" value="{{newApproval.title}}" bindinput="onTitleInput" />
+      </view>
+      <view class="form-item">
+        <view class="form-label">审批详情</view>
+        <textarea class="form-textarea" placeholder="请输入审批详情" value="{{newApproval.content}}" bindinput="onContentInput" />
+      </view>
+      <view class="form-item">
+        <view class="form-label">图片附件</view>
+        <view class="image-upload">
+          <view wx:for="{{images}}" wx:key="*this" class="uploaded-image">
+            <image src="{{item}}" mode="aspectFill"></image>
+            <view class="image-delete" bindtap="deleteImage" data-index="{{index}}">×</view>
+          </view>
+          <view wx:if="{{images.length < 9}}" class="upload-btn" bindtap="chooseImage">
+            <text class="upload-icon">+</text>
+          </view>
+        </view>
+      </view>
+      <button class="submit-btn" bindtap="submitApproval">提交审批</button>
+    </view>
+  </view>
+</view>
